@@ -96,11 +96,10 @@ int main() {
       TREX.current_frame = 0;
     } else if (frame_counter >= 60 / game_speed) {
       frame_counter = 0;
-      if (current_frame == 2)
-        current_frame = 3;
-      else if (current_frame == 3 || current_frame == 0)
-        current_frame = 2;
-      TREX.current_frame = current_frame * TREX.sprite_size.width;
+      if (TREX.current_frame == 2)
+        TREX.current_frame = 3;
+      else if (TREX.current_frame == 3 || TREX.current_frame == 0)
+        TREX.current_frame = 2;
     }
 
     BeginDrawing();
