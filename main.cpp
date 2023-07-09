@@ -1,5 +1,14 @@
 #include "trex.h"
+#include <cstdlib>
 #include <raylib.h>
+
+int RandomInt(int min, int max) { return min + (rand() % (max - min + 1)); }
+
+struct RenderedSprite {
+  SpriteGroup sprite_group;
+  int sprite_frame;
+  Vector2 position;
+};
 
 int main() {
   const int SCREEN_WIDTH = 800;
@@ -59,15 +68,27 @@ int main() {
   };
 
   float trex_ground_y = ground_level_y - TREX.texture.height;
-  Vector2 trex_position = {150, trex_ground_y}; // current trex position
+  Vector2 trex_position = {75, trex_ground_y}; // current trex position
 
-  int current_frame = 2;
   int frame_counter = 0;
 
   int game_speed = 5;
   int max_jump_height = 175;
   int is_jumping = 0; // 0 = not jumping, 1 = jumping, -1 = falling
   int jump_speed = 10;
+
+  RenderedSprite rendered_sprite_groups[] = {
+      RenderedSprite{
+          .sprite_group = SMALL_CACTI,
+          .sprite_frame = RandomInt(0, SMALL_CACTI.sprite_count),
+          .position = {SCREEN_WIDTH - 250,
+                       ground_level_y - SMALL_CACTI.sprite_size.height}},
+      RenderedSprite{
+          .sprite_group = LARGE_CACTI,
+          .sprite_frame = RandomInt(0, LARGE_CACTI.sprite_count),
+          .position = {SCREEN_WIDTH - 55,
+                       ground_level_y - LARGE_CACTI.sprite_size.height}},
+  };
 
   while (!WindowShouldClose()) {
 
@@ -108,39 +129,14 @@ int main() {
     DrawSpriteGroup(TREX, TREX.current_frame, trex_position);
 
     DrawTexture(GAME_SPRITES, 0, 0, WHITE);
-    DrawTextureRec(
-        SMALL_CACTI.texture,
-        Rectangle{
-            SMALL_CACTI.start.x + (3 * SMALL_CACTI.sprite_size.width),
-            SMALL_CACTI.start.y,
-            SMALL_CACTI.sprite_size.width,
-            SMALL_CACTI.sprite_size.height,
-        },
-        {trex_position.x + 200,
-         ground_level_y - SMALL_CACTI.sprite_size.height},
-        WHITE);
-    DrawTextureRec(
-        LARGE_CACTI.texture,
-        Rectangle{LARGE_CACTI.start.x + (3 * LARGE_CACTI.sprite_size.width),
-                  LARGE_CACTI.start.y, LARGE_CACTI.sprite_size.width,
-                  LARGE_CACTI.sprite_size.height},
-        {trex_position.x + 350,
-         ground_level_y - LARGE_CACTI.sprite_size.height},
-        WHITE);
-    DrawTextureRec(CACTI_GROUP.texture,
-                   Rectangle{CACTI_GROUP.start.x, CACTI_GROUP.start.y,
-                             CACTI_GROUP.sprite_size.width,
-                             CACTI_GROUP.sprite_size.height},
-                   {trex_position.x + 500,
-                    ground_level_y - CACTI_GROUP.sprite_size.height},
-                   WHITE);
+
+    for (RenderedSprite sprite : rendered_sprite_groups) {
+      DrawSpriteGroup(sprite.sprite_group, sprite.sprite_frame,
+                      sprite.position);
+    }
+
     DrawSpriteGroup(GROUND_PIECES, 0,
                     {0, ground_level_y - GROUND_PIECES.sprite_size.height});
-    DrawTextureRec(
-        PTERS.texture,
-        Rectangle{PTERS.start.x + (0 * PTERS.sprite_size.width), PTERS.start.y,
-                  PTERS.sprite_size.width, PTERS.sprite_size.height},
-        {50, ground_level_y - PTERS.sprite_size.height + 100}, WHITE);
 
     EndDrawing();
   }
