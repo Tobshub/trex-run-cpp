@@ -72,7 +72,7 @@ int main() {
 
   int frame_counter = 0;
 
-  int game_speed = 5;
+  int game_speed = 6;
   int max_jump_height = 175;
   int is_jumping = 0; // 0 = not jumping, 1 = jumping, -1 = falling
   int jump_speed = 10;
@@ -81,13 +81,8 @@ int main() {
       RenderedSprite{
           .sprite_group = SMALL_CACTI,
           .sprite_frame = RandomInt(0, SMALL_CACTI.sprite_count),
-          .position = {SCREEN_WIDTH - 250,
-                       ground_level_y - SMALL_CACTI.sprite_size.height}},
-      RenderedSprite{
-          .sprite_group = LARGE_CACTI,
-          .sprite_frame = RandomInt(0, LARGE_CACTI.sprite_count),
-          .position = {SCREEN_WIDTH - 55,
-                       ground_level_y - LARGE_CACTI.sprite_size.height}},
+          .position = Vector2{SCREEN_WIDTH - SMALL_CACTI.sprite_size.width,
+                              ground_level_y - SMALL_CACTI.sprite_size.height}},
   };
 
   while (!WindowShouldClose()) {
@@ -123,6 +118,17 @@ int main() {
         TREX.current_frame = 2;
     }
 
+    for (int i = 0; i < sizeof(rendered_sprite_groups) / sizeof(RenderedSprite);
+         i++) {
+      RenderedSprite *sprite = &rendered_sprite_groups[i];
+      if (sprite->position.x > 0.f - sprite->sprite_group.sprite_size.width) {
+        sprite->position.x -= game_speed; // ???
+      } else {
+        sprite->position.x =
+            (float)SCREEN_WIDTH + sprite->sprite_group.sprite_size.width;
+      }
+    }
+
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
@@ -140,6 +146,9 @@ int main() {
 
     EndDrawing();
   }
+
+  UnloadTexture(GAME_SPRITES);
+  UnloadTexture(TREX.texture);
 
   CloseWindow();
   return 0;
