@@ -8,7 +8,7 @@ struct UniqueSpriteGroup {
     float width;
     float height;
   } sprite_size;
-  unsigned int current_frame;
+  int current_frame;
 };
 
 struct SpriteGroup {

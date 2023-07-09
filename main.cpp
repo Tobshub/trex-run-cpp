@@ -1,11 +1,12 @@
 #include "trex.h"
 #include <cstdlib>
+#include <iostream>
 #include <raylib.h>
 
-int RandomInt(int min, int max) { return min + (rand() % (max - min + 1)); }
+int RandomInt(int min, int max) { return min + (rand() % (max - min)); }
 
 struct RenderedSprite {
-  SpriteGroup sprite_group;
+  const SpriteGroup *sprite_group;
   int sprite_frame;
   Vector2 position;
 };
@@ -60,12 +61,25 @@ int main() {
 
   const SpriteGroup GROUND_PIECES = {
       .texture = GAME_SPRITES,
-      .start = {0.f, (float)GROUND_PIECES.texture.height - 20},
+      .start = {0.f, (float)GROUND_PIECES.texture.height - 25},
       .sprite_count = 3,
       .sprite_size = {(float)GROUND_PIECES.texture.width /
                           GROUND_PIECES.sprite_count,
                       20},
   };
+
+  RenderedSprite GROUND[] = {
+      {
+          .sprite_group = &GROUND_PIECES,
+          .sprite_frame = RandomInt(0, GROUND_PIECES.sprite_count),
+          .position = {0, ground_level_y - GROUND_PIECES.sprite_size.height},
+      },
+      {
+          .sprite_group = &GROUND_PIECES,
+          .sprite_frame = RandomInt(0, GROUND_PIECES.sprite_count),
+          .position = {GROUND_PIECES.sprite_size.width,
+                       ground_level_y - GROUND_PIECES.sprite_size.height},
+      }};
 
   float trex_ground_y = ground_level_y - TREX.texture.height;
   Vector2 trex_position = {75, trex_ground_y}; // current trex position
@@ -77,9 +91,12 @@ int main() {
   int is_jumping = 0; // 0 = not jumping, 1 = jumping, -1 = falling
   int jump_speed = 10;
 
+  SpriteGroup OBSTACLE_SPRITES[] = {SMALL_CACTI, LARGE_CACTI, CACTI_GROUP,
+                                    PTERS};
+
   RenderedSprite rendered_sprite_groups[] = {
       RenderedSprite{
-          .sprite_group = SMALL_CACTI,
+          .sprite_group = &SMALL_CACTI,
           .sprite_frame = RandomInt(0, SMALL_CACTI.sprite_count),
           .position = Vector2{SCREEN_WIDTH - SMALL_CACTI.sprite_size.width,
                               ground_level_y - SMALL_CACTI.sprite_size.height}},
@@ -121,11 +138,38 @@ int main() {
     for (int i = 0; i < sizeof(rendered_sprite_groups) / sizeof(RenderedSprite);
          i++) {
       RenderedSprite *sprite = &rendered_sprite_groups[i];
-      if (sprite->position.x > 0.f - sprite->sprite_group.sprite_size.width) {
-        sprite->position.x -= game_speed; // ???
+      if (sprite->position.x > 0.f - sprite->sprite_group->sprite_size.width) {
+        sprite->position.x -= game_speed;
       } else {
-        sprite->position.x =
-            (float)SCREEN_WIDTH + sprite->sprite_group.sprite_size.width;
+        SpriteGroup random_sprite_group = OBSTACLE_SPRITES[RandomInt(
+            0, sizeof(OBSTACLE_SPRITES) / sizeof(SpriteGroup))];
+
+        sprite->sprite_group = &random_sprite_group;
+        sprite->sprite_frame = RandomInt(0, random_sprite_group.sprite_count);
+        sprite->position = {
+            SCREEN_WIDTH - random_sprite_group.sprite_size.width,
+            ground_level_y - random_sprite_group.sprite_size.height};
+      }
+    }
+
+    for (int i = 0; i < sizeof(GROUND) / sizeof(RenderedSprite); i++) {
+      RenderedSprite *ground_piece = &GROUND[i];
+      if (ground_piece->position.x +
+              ground_piece->sprite_group->sprite_size.width >
+          0) {
+        ground_piece->position.x -= game_speed;
+      } else {
+        if (i < (sizeof(GROUND) / sizeof(RenderedSprite)) - 1) {
+          GROUND[i] = GROUND[i + 1];
+          GROUND[i + 1] = RenderedSprite{
+              .sprite_group = &GROUND_PIECES,
+              .sprite_frame = RandomInt(0, GROUND_PIECES.sprite_count),
+              .position = {GROUND_PIECES.sprite_size.width,
+                           ground_level_y - GROUND_PIECES.sprite_size.height},
+          };
+        } else {
+          std::cout << i << " is last" << std::endl;
+        }
       }
     }
 
@@ -137,12 +181,15 @@ int main() {
     DrawTexture(GAME_SPRITES, 0, 0, WHITE);
 
     for (RenderedSprite sprite : rendered_sprite_groups) {
-      DrawSpriteGroup(sprite.sprite_group, sprite.sprite_frame,
+      DrawSpriteGroup(*sprite.sprite_group, sprite.sprite_frame,
                       sprite.position);
     }
 
-    DrawSpriteGroup(GROUND_PIECES, 0,
-                    {0, ground_level_y - GROUND_PIECES.sprite_size.height});
+    for (int i = 0; i < sizeof(GROUND) / sizeof(RenderedSprite); i++) {
+      RenderedSprite ground_piece = GROUND[i];
+      DrawSpriteGroup(*ground_piece.sprite_group, ground_piece.sprite_frame,
+                      ground_piece.position);
+    }
 
     EndDrawing();
   }
