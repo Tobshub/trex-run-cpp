@@ -189,8 +189,6 @@ int main() {
 
     DrawSpriteGroup(*TREX.sprite_group, TREX.sprite_frame, TREX.position);
 
-    DrawTexture(GAME_SPRITES, 0, 0, WHITE);
-
     for (RenderedSprite sprite : rendered_sprite_groups) {
       DrawSpriteGroup(*sprite.sprite_group, sprite.sprite_frame,
                       sprite.position);
