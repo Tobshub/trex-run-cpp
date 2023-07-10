@@ -158,7 +158,6 @@ int main() {
         if (CheckCollisionCircleRec(std::get<0>(trex_hitbox),
                                     std::get<1>(trex_hitbox),
                                     GetRenderedSpriteRect(sprite))) {
-          // std::cout << "collision" << std::endl;
           has_collided = true;
         }
       }
