@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <tuple>
 
 struct SpriteGroup {
   const Texture2D texture;
@@ -16,6 +17,7 @@ struct RenderedSprite {
   Vector2 position;
 };
 
-void DrawSpriteGroup(SpriteGroup sprite_ground, int frame, Vector2 position);
+void DrawSpriteGroup(SpriteGroup sprite_group, int frame, Vector2 position);
 
-Rectangle GetRenderedSpriteRect(RenderedSprite *sprite_ground);
+Rectangle GetRenderedSpriteRect(RenderedSprite *sprite);
+std::tuple<Vector2, float> GetRenderedSpriteCircle(RenderedSprite *sprite);

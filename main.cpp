@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <raylib.h>
+#include <tuple>
 
 int RandomInt(int min, int max) { return min + (rand() % (max - min)); }
 
@@ -82,7 +83,7 @@ int main() {
 
   int frame_counter = 0;
 
-  int game_speed = 12;
+  int game_speed = 4;
   int max_jump_height = 200;
   int is_jumping = 0; // 0 = not jumping, 1 = jumping, -1 = falling
   int jump_speed = 10;
@@ -117,10 +118,10 @@ int main() {
           TREX.position.y = trex_ground_y;
         }
 
-        if (is_jumping == 1) {
-          TREX.position.y -= jump_speed;
-        } else if (is_jumping == -1) {
-          TREX.position.y += jump_speed;
+        if (TREX.position.y > trex_ground_y - max_jump_height / 1.25f) {
+          TREX.position.y += is_jumping * -1 * jump_speed;
+        } else {
+          TREX.position.y += is_jumping * -1 * jump_speed / 3.f;
         }
       }
 
@@ -153,8 +154,11 @@ int main() {
               SCREEN_WIDTH - random_sprite_group.sprite_size.width,
               ground_level_y - random_sprite_group.sprite_size.height};
         }
-        if (CheckCollisionRecs(GetRenderedSpriteRect(sprite),
-                               GetRenderedSpriteRect(&TREX))) {
+        std::tuple<Vector2, float> trex_hitbox = GetRenderedSpriteCircle(&TREX);
+        if (CheckCollisionCircleRec(std::get<0>(trex_hitbox),
+                                    std::get<1>(trex_hitbox),
+                                    GetRenderedSpriteRect(sprite))) {
+          // std::cout << "collision" << std::endl;
           has_collided = true;
         }
       }
