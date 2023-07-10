@@ -1,6 +1,15 @@
 #include "trex.h"
 #include <raylib.h>
 
+Rectangle GetRenderedSpriteRect(RenderedSprite *sprite_group) {
+  return Rectangle{
+      sprite_group->position.x,
+      sprite_group->position.y,
+      sprite_group->sprite_group->sprite_size.width,
+      sprite_group->sprite_group->sprite_size.height,
+  };
+}
+
 void DrawSpriteGroup(SpriteGroup sprite_group, int frame, Vector2 position) {
   DrawTextureRec(
       sprite_group.texture,
@@ -13,12 +22,3 @@ void DrawSpriteGroup(SpriteGroup sprite_group, int frame, Vector2 position) {
       },
       position, WHITE);
 }
-void DrawSpriteGroup(UniqueSpriteGroup sprite_group, int frame,
-                     Vector2 position) {
-  DrawSpriteGroup(SpriteGroup{sprite_group.texture,
-                              sprite_group.start,
-                              sprite_group.sprite_count,
-                              {sprite_group.sprite_size.width,
-                               sprite_group.sprite_size.height}},
-                  frame, position);
-};

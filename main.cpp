@@ -5,12 +5,6 @@
 
 int RandomInt(int min, int max) { return min + (rand() % (max - min)); }
 
-struct RenderedSprite {
-  const SpriteGroup *sprite_group;
-  int sprite_frame;
-  Vector2 position;
-};
-
 int main() {
   const int SCREEN_WIDTH = 800;
   const int SCREEN_HEIGHT = 600;
@@ -18,18 +12,23 @@ int main() {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Trex Run");
   SetTargetFPS(60);
 
+  float ground_level_y = SCREEN_HEIGHT - 150; // rest/running height
+
   const Texture2D GAME_SPRITES = LoadTexture("resources/all-sprites.png");
 
-  UniqueSpriteGroup TREX = {
+  SpriteGroup TREX_GROUP = {
       .texture = LoadTexture("resources/trex.png"),
       .start = {0.f, 0.f},
       .sprite_count = 6,
-      .sprite_size = {(float)TREX.texture.width / TREX.sprite_count,
-                      (float)TREX.texture.height},
-      .current_frame = 0,
+      .sprite_size = {(float)TREX_GROUP.texture.width / TREX_GROUP.sprite_count,
+                      (float)TREX_GROUP.texture.height},
   };
 
-  float ground_level_y = SCREEN_HEIGHT - 150; // rest/running height
+  float trex_ground_y = ground_level_y - TREX_GROUP.texture.height;
+
+  RenderedSprite TREX = {.sprite_group = &TREX_GROUP,
+                         .sprite_frame = 0,
+                         .position = {75, trex_ground_y}};
 
   const SpriteGroup PTERS = {
       .texture = GAME_SPRITES,
@@ -81,13 +80,10 @@ int main() {
                        ground_level_y - GROUND_PIECES.sprite_size.height},
       }};
 
-  float trex_ground_y = ground_level_y - TREX.texture.height;
-  Vector2 trex_position = {75, trex_ground_y}; // current trex position
-
   int frame_counter = 0;
 
-  int game_speed = 6;
-  int max_jump_height = 175;
+  int game_speed = 12;
+  int max_jump_height = 200;
   int is_jumping = 0; // 0 = not jumping, 1 = jumping, -1 = falling
   int jump_speed = 10;
 
@@ -102,73 +98,85 @@ int main() {
                               ground_level_y - SMALL_CACTI.sprite_size.height}},
   };
 
+  bool has_collided = false;
+
   while (!WindowShouldClose()) {
 
-    if (IsKeyPressed(KEY_SPACE) && is_jumping == 0) {
-      is_jumping = 1;
-    }
+    if (has_collided) {
 
-    if (is_jumping != 0) {
-      if (trex_position.y <= trex_ground_y - max_jump_height) {
-        is_jumping = -1;
-      } else if (trex_position.y >= trex_ground_y && is_jumping == -1) {
-        is_jumping = 0;
-        trex_position.y = trex_ground_y;
+    } else {
+      if (IsKeyPressed(KEY_SPACE) && is_jumping == 0) {
+        is_jumping = 1;
       }
 
-      if (is_jumping == 1) {
-        trex_position.y -= jump_speed;
-      } else if (is_jumping == -1) {
-        trex_position.y += jump_speed;
+      if (is_jumping != 0) {
+        if (TREX.position.y <= trex_ground_y - max_jump_height) {
+          is_jumping = -1;
+        } else if (TREX.position.y >= trex_ground_y && is_jumping == -1) {
+          is_jumping = 0;
+          TREX.position.y = trex_ground_y;
+        }
+
+        if (is_jumping == 1) {
+          TREX.position.y -= jump_speed;
+        } else if (is_jumping == -1) {
+          TREX.position.y += jump_speed;
+        }
       }
-    }
 
-    frame_counter++;
+      frame_counter++;
 
-    if (is_jumping != 0) {
-      TREX.current_frame = 0;
-    } else if (frame_counter >= 60 / game_speed) {
-      frame_counter = 0;
-      if (TREX.current_frame == 2)
-        TREX.current_frame = 3;
-      else if (TREX.current_frame == 3 || TREX.current_frame == 0)
-        TREX.current_frame = 2;
-    }
-
-    for (int i = 0; i < sizeof(rendered_sprite_groups) / sizeof(RenderedSprite);
-         i++) {
-      RenderedSprite *sprite = &rendered_sprite_groups[i];
-      if (sprite->position.x > 0.f - sprite->sprite_group->sprite_size.width) {
-        sprite->position.x -= game_speed;
-      } else {
-        SpriteGroup random_sprite_group = OBSTACLE_SPRITES[RandomInt(
-            0, sizeof(OBSTACLE_SPRITES) / sizeof(SpriteGroup))];
-
-        sprite->sprite_group = &random_sprite_group;
-        sprite->sprite_frame = RandomInt(0, random_sprite_group.sprite_count);
-        sprite->position = {
-            SCREEN_WIDTH - random_sprite_group.sprite_size.width,
-            ground_level_y - random_sprite_group.sprite_size.height};
+      if (is_jumping != 0) {
+        TREX.sprite_frame = 0;
+      } else if (frame_counter >= 60 / game_speed) {
+        frame_counter = 0;
+        if (TREX.sprite_frame == 2)
+          TREX.sprite_frame = 3;
+        else if (TREX.sprite_frame == 3 || TREX.sprite_frame == 0)
+          TREX.sprite_frame = 2;
       }
-    }
 
-    for (int i = 0; i < sizeof(GROUND) / sizeof(RenderedSprite); i++) {
-      RenderedSprite *ground_piece = &GROUND[i];
-      if (ground_piece->position.x +
-              ground_piece->sprite_group->sprite_size.width >
-          0) {
-        ground_piece->position.x -= game_speed;
-      } else {
-        if (i < (sizeof(GROUND) / sizeof(RenderedSprite)) - 1) {
-          GROUND[i] = GROUND[i + 1];
-          GROUND[i + 1] = RenderedSprite{
-              .sprite_group = &GROUND_PIECES,
-              .sprite_frame = RandomInt(0, GROUND_PIECES.sprite_count),
-              .position = {GROUND_PIECES.sprite_size.width,
-                           ground_level_y - GROUND_PIECES.sprite_size.height},
-          };
+      for (int i = 0;
+           i < (int)(sizeof(rendered_sprite_groups) / sizeof(RenderedSprite));
+           i++) {
+        RenderedSprite *sprite = &rendered_sprite_groups[i];
+        if (sprite->position.x >
+            0.f - sprite->sprite_group->sprite_size.width) {
+          sprite->position.x -= game_speed;
         } else {
-          std::cout << i << " is last" << std::endl;
+          SpriteGroup random_sprite_group = OBSTACLE_SPRITES[RandomInt(
+              0, sizeof(OBSTACLE_SPRITES) / sizeof(SpriteGroup))];
+
+          sprite->sprite_group = &random_sprite_group;
+          sprite->sprite_frame = RandomInt(0, random_sprite_group.sprite_count);
+          sprite->position = {
+              SCREEN_WIDTH - random_sprite_group.sprite_size.width,
+              ground_level_y - random_sprite_group.sprite_size.height};
+        }
+        if (CheckCollisionRecs(GetRenderedSpriteRect(sprite),
+                               GetRenderedSpriteRect(&TREX))) {
+          has_collided = true;
+        }
+      }
+
+      for (int i = 0; i < (int)(sizeof(GROUND) / sizeof(RenderedSprite)); i++) {
+        RenderedSprite *ground_piece = &GROUND[i];
+        if (ground_piece->position.x +
+                ground_piece->sprite_group->sprite_size.width >
+            0) {
+          ground_piece->position.x -= game_speed;
+        } else {
+          if (i < (int)(sizeof(GROUND) / sizeof(RenderedSprite)) - 1) {
+            GROUND[i] = GROUND[i + 1];
+            GROUND[i + 1] = RenderedSprite{
+                .sprite_group = &GROUND_PIECES,
+                .sprite_frame = RandomInt(0, GROUND_PIECES.sprite_count),
+                .position = {GROUND_PIECES.sprite_size.width,
+                             ground_level_y - GROUND_PIECES.sprite_size.height},
+            };
+          } else {
+            std::cout << i << " is last" << std::endl;
+          }
         }
       }
     }
@@ -176,7 +184,7 @@ int main() {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    DrawSpriteGroup(TREX, TREX.current_frame, trex_position);
+    DrawSpriteGroup(*TREX.sprite_group, TREX.sprite_frame, TREX.position);
 
     DrawTexture(GAME_SPRITES, 0, 0, WHITE);
 
@@ -185,7 +193,7 @@ int main() {
                       sprite.position);
     }
 
-    for (int i = 0; i < sizeof(GROUND) / sizeof(RenderedSprite); i++) {
+    for (int i = 0; i < (int)(sizeof(GROUND) / sizeof(RenderedSprite)); i++) {
       RenderedSprite ground_piece = GROUND[i];
       DrawSpriteGroup(*ground_piece.sprite_group, ground_piece.sprite_frame,
                       ground_piece.position);
@@ -195,7 +203,7 @@ int main() {
   }
 
   UnloadTexture(GAME_SPRITES);
-  UnloadTexture(TREX.texture);
+  UnloadTexture(TREX.sprite_group->texture);
 
   CloseWindow();
   return 0;
