@@ -157,9 +157,11 @@ int main() {
               ground_level_y - random_sprite_group.sprite_size.height};
         }
         std::tuple<Vector2, float> trex_hitbox = GetRenderedSpriteCircle(&TREX);
-        if (CheckCollisionCircleRec(std::get<0>(trex_hitbox),
-                                    std::get<1>(trex_hitbox),
-                                    GetRenderedSpriteRect(sprite))) {
+        std::tuple<Vector2, float> sprite_hitbox =
+            GetRenderedSpriteCircle(sprite);
+        if (CheckCollisionCircles(
+                std::get<0>(trex_hitbox), std::get<1>(trex_hitbox),
+                std::get<0>(sprite_hitbox), std::get<1>(sprite_hitbox))) {
           has_collided = true;
         }
       }
