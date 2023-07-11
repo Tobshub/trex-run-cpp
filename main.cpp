@@ -104,6 +104,8 @@ int main() {
 
   bool has_collided = false;
 
+  int score = 0;
+
   while (!WindowShouldClose()) {
 
     if (has_collided) {
@@ -129,15 +131,17 @@ int main() {
       }
 
       frame_counter++;
-
-      if (is_jumping != 0) {
-        TREX.sprite_frame = 0;
-      } else if (frame_counter >= 60 / game_speed) {
+      if (frame_counter >= 60 / game_speed) {
+        score++;
         frame_counter = 0;
-        if (TREX.sprite_frame == 2)
-          TREX.sprite_frame = 3;
-        else if (TREX.sprite_frame == 3 || TREX.sprite_frame == 0)
-          TREX.sprite_frame = 2;
+        if (is_jumping != 0) {
+          TREX.sprite_frame = 0;
+        } else {
+          if (TREX.sprite_frame == 2)
+            TREX.sprite_frame = 3;
+          else if (TREX.sprite_frame == 3 || TREX.sprite_frame == 0)
+            TREX.sprite_frame = 2;
+        }
       }
 
       for (int i = 0;
@@ -205,6 +209,8 @@ int main() {
       DrawSpriteGroup(*ground_piece.sprite_group, ground_piece.sprite_frame,
                       ground_piece.position);
     }
+
+    DrawText(TextFormat("Score: %i", score), SCREEN_WIDTH - 100, 5, 15, GRAY);
 
     EndDrawing();
   }
