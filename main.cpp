@@ -19,12 +19,13 @@ int main() {
 
   const Texture2D GAME_SPRITES = LoadTexture("resources/all-sprites.png");
 
+  const Texture2D TREX_TEXTURES = LoadTexture("resources/trex.png");
   SpriteGroup TREX_GROUP = {
-      .texture = LoadTexture("resources/trex.png"),
+      .texture = TREX_TEXTURES,
       .start = {0.f, 0.f},
       .sprite_count = 6,
-      .sprite_size = {(float)TREX_GROUP.texture.width / TREX_GROUP.sprite_count,
-                      (float)TREX_GROUP.texture.height},
+      .sprite_size = {(float)TREX_TEXTURES.width / TREX_GROUP.sprite_count,
+                      (float)TREX_TEXTURES.height},
   };
 
   float trex_ground_y = ground_level_y - TREX_GROUP.texture.height;
@@ -208,7 +209,7 @@ int main() {
   }
 
   UnloadTexture(GAME_SPRITES);
-  UnloadTexture(TREX.sprite_group->texture);
+  UnloadTexture(TREX_TEXTURES);
 
   CloseWindow();
   return 0;
