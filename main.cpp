@@ -6,6 +6,8 @@
 
 int RandomInt(int min, int max) { return min + (rand() % (max - min)); }
 
+#define RandomSpriteFrame(sprite_group) RandomInt(0, sprite_group.sprite_count)
+
 int main() {
   const int SCREEN_WIDTH = 800;
   const int SCREEN_HEIGHT = 600;
@@ -71,12 +73,12 @@ int main() {
   RenderedSprite GROUND[] = {
       {
           .sprite_group = &GROUND_PIECES,
-          .sprite_frame = RandomInt(0, GROUND_PIECES.sprite_count),
+          .sprite_frame = RandomSpriteFrame(GROUND_PIECES),
           .position = {0, ground_level_y - GROUND_PIECES.sprite_size.height},
       },
       {
           .sprite_group = &GROUND_PIECES,
-          .sprite_frame = RandomInt(0, GROUND_PIECES.sprite_count),
+          .sprite_frame = RandomSpriteFrame(GROUND_PIECES),
           .position = {GROUND_PIECES.sprite_size.width,
                        ground_level_y - GROUND_PIECES.sprite_size.height},
       }};
@@ -94,7 +96,7 @@ int main() {
   RenderedSprite rendered_sprite_groups[] = {
       RenderedSprite{
           .sprite_group = &SMALL_CACTI,
-          .sprite_frame = RandomInt(0, SMALL_CACTI.sprite_count),
+          .sprite_frame = RandomSpriteFrame(SMALL_CACTI),
           .position = Vector2{SCREEN_WIDTH - SMALL_CACTI.sprite_size.width,
                               ground_level_y - SMALL_CACTI.sprite_size.height}},
   };
@@ -149,7 +151,7 @@ int main() {
               0, sizeof(OBSTACLE_SPRITES) / sizeof(SpriteGroup))];
 
           sprite->sprite_group = &random_sprite_group;
-          sprite->sprite_frame = RandomInt(0, random_sprite_group.sprite_count);
+          sprite->sprite_frame = RandomSpriteFrame(random_sprite_group);
           sprite->position = {
               SCREEN_WIDTH - random_sprite_group.sprite_size.width,
               ground_level_y - random_sprite_group.sprite_size.height};
@@ -173,7 +175,7 @@ int main() {
             GROUND[i] = GROUND[i + 1];
             GROUND[i + 1] = RenderedSprite{
                 .sprite_group = &GROUND_PIECES,
-                .sprite_frame = RandomInt(0, GROUND_PIECES.sprite_count),
+                .sprite_frame = RandomSpriteFrame(GROUND_PIECES),
                 .position = {GROUND_PIECES.sprite_size.width,
                              ground_level_y - GROUND_PIECES.sprite_size.height},
             };
