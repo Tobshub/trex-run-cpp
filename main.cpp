@@ -109,7 +109,24 @@ int main() {
   while (!WindowShouldClose()) {
 
     if (has_collided) {
-
+      if (IsKeyPressed(KEY_SPACE)) {
+        has_collided = false;
+        score = 0;
+        frame_counter = 0;
+        TREX.position = {75, trex_ground_y};
+        for (int i = 0;
+             i < (int)(sizeof(rendered_sprite_groups) / sizeof(RenderedSprite));
+             i++) {
+          SpriteGroup random_sprite_group = OBSTACLE_SPRITES[RandomInt(
+              0, sizeof(OBSTACLE_SPRITES) / sizeof(SpriteGroup))];
+          rendered_sprite_groups[i] = RenderedSprite{
+              .sprite_group = &random_sprite_group,
+              .sprite_frame = RandomSpriteFrame(random_sprite_group),
+              .position = {SCREEN_WIDTH - random_sprite_group.sprite_size.width,
+                           ground_level_y -
+                               random_sprite_group.sprite_size.height}};
+        }
+      }
     } else {
       if (IsKeyPressed(KEY_SPACE) && is_jumping == 0) {
         is_jumping = 1;
@@ -210,7 +227,10 @@ int main() {
                       ground_piece.position);
     }
 
-    DrawText(TextFormat("Score: %i", score), SCREEN_WIDTH - 100, 5, 15, GRAY);
+    DrawText(TextFormat("Score: %i", score), 5, 5, 24, GRAY);
+
+    if (has_collided)
+      DrawText("Game Over", 5, 32, 24, RED);
 
     EndDrawing();
   }
