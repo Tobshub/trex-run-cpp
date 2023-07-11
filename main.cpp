@@ -151,11 +151,12 @@ int main() {
           SpriteGroup random_sprite_group = OBSTACLE_SPRITES[RandomInt(
               0, sizeof(OBSTACLE_SPRITES) / sizeof(SpriteGroup))];
 
-          sprite->sprite_group = &random_sprite_group;
-          sprite->sprite_frame = RandomSpriteFrame(random_sprite_group);
-          sprite->position = {
-              SCREEN_WIDTH - random_sprite_group.sprite_size.width,
-              ground_level_y - random_sprite_group.sprite_size.height};
+          rendered_sprite_groups[i] = RenderedSprite{
+              .sprite_group = &random_sprite_group,
+              .sprite_frame = RandomSpriteFrame(random_sprite_group),
+              .position = {SCREEN_WIDTH - random_sprite_group.sprite_size.width,
+                           ground_level_y -
+                               random_sprite_group.sprite_size.height}};
         }
         std::tuple<Vector2, float> trex_hitbox = GetRenderedSpriteCircle(&TREX);
         std::tuple<Vector2, float> sprite_hitbox =
