@@ -113,6 +113,7 @@ int main() {
         has_collided = false;
         score = 0;
         frame_counter = 0;
+        game_speed = 4;
         TREX.position = {75, trex_ground_y};
         for (int i = 0;
              i < (int)(sizeof(rendered_sprite_groups) / sizeof(RenderedSprite));
@@ -128,6 +129,9 @@ int main() {
         }
       }
     } else {
+      if (score > 0 && score % 500 == 0) {
+        game_speed++;
+      }
       if (IsKeyPressed(KEY_SPACE) && is_jumping == 0) {
         is_jumping = 1;
       }
@@ -140,7 +144,7 @@ int main() {
           TREX.position.y = trex_ground_y;
         }
 
-        if (TREX.position.y > trex_ground_y - max_jump_height / 1.25f) {
+        if (TREX.position.y > trex_ground_y - max_jump_height / 1.3f) {
           TREX.position.y += is_jumping * -1 * jump_speed;
         } else {
           TREX.position.y += is_jumping * -1 * jump_speed / 3.f;
